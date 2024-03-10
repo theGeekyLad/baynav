@@ -1,7 +1,11 @@
-package com.thegeekylad.baynav.service;
+package com.thegeekylad.baynav.presentation.service;
 
 import com.google.gson.JsonObject;
-import com.thegeekylad.baynav.util.Constants;
+import com.thegeekylad.baynav.presentation.model.Departure;
+import com.thegeekylad.baynav.presentation.model.Stop;
+
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
@@ -10,17 +14,14 @@ import retrofit2.http.Query;
 
 public interface TransitService {
 
-    @Headers("apiKey: " + Constants.TRANSIT_API_KEY)
     @GET("nearby_stops")
-    Call<JsonObject> nearbyStops(
+    Call<List<Stop>> nearbyStops(
             @Query("lat") String lat,
-            @Query("lon") String lon,
-            @Query("max_distance") String distance
+            @Query("lon") String lon
     );
 
-    @Headers("apiKey: " + Constants.TRANSIT_API_KEY)
     @GET("stop_departures")
-    Call<JsonObject> stopDepartures(
+    Call<List<Departure>> stopDepartures(
             @Query("global_stop_id") String global_stop_id
     );
 }

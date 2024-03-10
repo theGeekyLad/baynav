@@ -1,12 +1,12 @@
 package com.thegeekylad.baynav.presentation.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.JsonObject;
+import com.google.gson.annotations.SerializedName;
 
 public class Stop {
-    @JsonProperty("stop_name")
+    @SerializedName("stop_name")
     public String stopName;
-    @JsonProperty("global_stop_id")
+    @SerializedName("global_stop_id")
     public String globalStopId;
     public String distance;
 

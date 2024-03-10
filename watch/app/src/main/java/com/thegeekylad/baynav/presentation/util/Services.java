@@ -2,11 +2,15 @@
 package com.thegeekylad.baynav.presentation.util;
 
 import com.google.gson.JsonObject;
-import com.thegeekylad.baynav.service.TransitService;
+import com.thegeekylad.baynav.presentation.model.Departure;
+import com.thegeekylad.baynav.presentation.model.Stop;
+import com.thegeekylad.baynav.presentation.service.TransitService;
+
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
+import java.util.List;
 
 public class Services {
     public static Logger logger = new Logger("Services");
@@ -19,7 +23,12 @@ public class Services {
         if (retrofit == null) {
             retrofit = new Retrofit.Builder()
                     .addConverterFactory(GsonConverterFactory.create())
-                    .baseUrl("https://external.transitapp.com/v3/public/")
+                    .baseUrl(String.format(
+                            "%s://%s:%s/",
+                            Constants.BE_PROTO,
+                            Constants.BE_IP,
+                            Constants.BE_PORT
+                    ))
                     .build();
 
             transitService = retrofit.create(TransitService.class);
@@ -29,9 +38,9 @@ public class Services {
     }
 
     public static class Helper {
-        public static JsonObject getNearbyStops(String lat, String lon) {
+        public static List<Stop> getNearbyStops(String lat, String lon) {
             try {
-                return getTransitService().nearbyStops(lat, lon, Constants.MAX_DISTANCE_STOPS).execute().body();
+                return getTransitService().nearbyStops(lat, lon).execute().body();
             } catch (IOException e) {
                 logger.printHeader(String.format("Error: \"%s\"", e.getMessage()), 0);
                 e.printStackTrace();
@@ -41,7 +50,7 @@ public class Services {
             }
         }
 
-        public static JsonObject getStopDepartures(String globalStopId) {
+        public static List<Departure> getStopDepartures(String globalStopId) {
             try {
                 return getTransitService().stopDepartures(globalStopId).execute().body();
             } catch (IOException e) {

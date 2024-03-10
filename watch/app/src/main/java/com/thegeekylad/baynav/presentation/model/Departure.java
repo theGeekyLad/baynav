@@ -1,16 +1,17 @@
 package com.thegeekylad.baynav.presentation.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+
+import com.google.gson.annotations.SerializedName;
 
 public class Departure {
-    @JsonProperty("global_route_id")
+    @SerializedName("global_route_id")
     public String globalRouteId;
-    @JsonProperty("route_short_name")
+    @SerializedName("route_short_name")
     public String routeShortName;
-    @JsonProperty("direction_headsign")
+    @SerializedName("direction_headsign")
     public String directionHeadsign;
 
-    @JsonProperty("departure_interval")
+    @SerializedName("departure_interval")
     public String departureInterval;
 
     public Departure(String globalRouteId, String routeShortName, String directionHeadsign, String departureInterval) {

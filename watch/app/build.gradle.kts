@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.thegeekylad.baynav"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.thegeekylad.baynav"
@@ -66,4 +66,16 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    // nav controller
+    implementation("androidx.wear.compose:compose-navigation:1.3.0")
+
+    // retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    // gson
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // horologist-compose-layout
+    implementation("com.google.android.horologist:horologist-compose-layout:0.6.3")
+
 }
