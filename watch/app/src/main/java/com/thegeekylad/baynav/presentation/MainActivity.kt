@@ -219,5 +219,4 @@ class MainActivity : ComponentActivity() {
     private fun toastThrottledStatus() {
         Toast.makeText(applicationContext, "You've been throttled!", Toast.LENGTH_SHORT).show()
     }
-
 }
