@@ -87,29 +87,30 @@ class MainActivity : ComponentActivity() {
 
                 // sync stops / location
                 LaunchedEffect(key1 = keyOnce) {
-//                    val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(applicationContext)
-//                    fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
-                    coroutineScope.launch(Dispatchers.IO) {
-//                            stopsList.value = Services.Helper.getNearbyStops(
-//                                location.latitude.toString(),
-//                                location.longitude.toString(),
-//                            )
-                        isApiCall.value = true
-                        val res = Services.Helper.getNearbyStops(
-                            "37.330640868974236",
-                            "-121.90519826561415"
-                        )
-                        if (res == null) {
-                            withContext(Dispatchers.Main) {
-                                toastThrottledStatus()
-                                navController.popBackStack()
+                    isApiCall.value = true
+                    val fusedLocationProviderClient =
+                        LocationServices.getFusedLocationProviderClient(applicationContext)
+                    fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
+                        coroutineScope.launch(Dispatchers.IO) {
+//                        val res = Services.Helper.getNearbyStops(
+//                            "37.330640868974236",
+//                            "-121.90519826561415"
+//                        )
+                            val res = Services.Helper.getNearbyStops(
+                                location.latitude.toString(),
+                                location.longitude.toString(),
+                            )
+                            if (res == null) {
+                                withContext(Dispatchers.Main) {
+                                    toastThrottledStatus()
+                                    finish()
+                                }
+                            } else {
+                                stopsList.value = res
                             }
-                        } else {
-                            stopsList.value = res
+                            isApiCall.value = false
                         }
-                        isApiCall.value = false
                     }
-//                    }
                 }
 
                 SwipeDismissableNavHost(
@@ -129,7 +130,7 @@ class MainActivity : ComponentActivity() {
                                     if (res == null) {
                                         withContext(Dispatchers.Main) {
                                             toastThrottledStatus()
-                                            navController.popBackStack()
+//                                            navController.popBackStack()
                                         }
                                     } else {
                                         departuresList.value = res
@@ -156,17 +157,24 @@ class MainActivity : ComponentActivity() {
                             title = it.arguments?.getString("stop_name") ?: "Departures",
                             data = departuresList.value,
                             onClick = { departure ->
-                                navController.navigate("${TrackerDestination().path}?countdown=${departure.departureInterval}&global_stop_id=${it.arguments!!.getString("global_stop_id")}&global_route_id=${departure.globalRouteId}")
+                                navController.navigate("${TrackerDestination().path}?" +
+                                        "countdown=${departure.departureInterval}&" +
+                                        "global_stop_id=${it.arguments!!.getString("global_stop_id")}&" +
+                                        "route_name=${departure.routeShortName} - ${departure.directionHeadsign}&" +
+                                        "stop_name=${it.arguments?.getString("stop_name")}&" +
+                                        "global_route_id=${departure.globalRouteId}")
                             }
                         )
                     }
 
                     composable(
-                        "${TrackerDestination().path}?countdown={countdown}&global_stop_id={global_stop_id}&global_route_id={global_route_id}",
+                        "${TrackerDestination().path}?countdown={countdown}&global_stop_id={global_stop_id}&global_route_id={global_route_id}&route_name={route_name}&stop_name={stop_name}",
                         arguments = listOf(
                             navArgument("countdown") { },
                             navArgument("global_stop_id") { },
-                            navArgument("global_route_id") { }
+                            navArgument("global_route_id") { },
+                            navArgument("route_name") { },
+                            navArgument("stop_name") { },
                         )
                     ) {
                         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -175,6 +183,8 @@ class MainActivity : ComponentActivity() {
                             countdown = it.arguments!!.getString("countdown")!!.toInt() * 60,
                             globalStopId = it.arguments!!.getString("global_stop_id")!!,
                             globalRouteId = it.arguments!!.getString("global_route_id")!!,
+                            stopName = it.arguments!!.getString("stop_name")!!,
+                            routeName = it.arguments!!.getString("route_name")!!,
                         )
                     }
                 }
@@ -188,6 +198,8 @@ class MainActivity : ComponentActivity() {
                     ) {
                         CircularProgressIndicator(
                             modifier = Modifier.fillMaxSize(),
+                            indicatorColor = MaterialTheme.colors.primary,
+                            strokeWidth = 4.dp
                         )
 
                         Text(

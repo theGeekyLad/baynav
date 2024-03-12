@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,6 +19,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.CircularProgressIndicator
@@ -38,6 +40,8 @@ fun DepartureTracker(
     countdown: Int,
     globalStopId: String,
     globalRouteId: String,
+    stopName: String,
+    routeName: String,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val seconds = remember { mutableStateOf(countdown) }
@@ -80,7 +84,8 @@ fun DepartureTracker(
                 .fillMaxSize()
                 .padding(4.dp),
             startAngle = -60f,
-            endAngle = 240f
+            endAngle = 240f,
+            strokeWidth = 4.dp
         )
 
         Column(
@@ -89,10 +94,14 @@ fun DepartureTracker(
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 12.dp),
-                text = "22 - Palo Alto",
+                    .padding(horizontal = 16.dp)
+                    .wrapContentHeight(align = Alignment.CenterVertically)
+                    .weight(1f, true),
+                text = routeName,
                 style = MaterialTheme.typography.title3,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 2
             )
             
             Spacer(modifier = Modifier.weight(1f, true))
@@ -100,10 +109,14 @@ fun DepartureTracker(
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                text = "Santa Clara / 5th",
+                    .padding(horizontal = 16.dp)
+                    .wrapContentHeight(align = Alignment.CenterVertically)
+                    .weight(1f, true),
+                text = stopName,
                 style = MaterialTheme.typography.caption2,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 2
             )
         }
 
