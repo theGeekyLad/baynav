@@ -23,12 +23,7 @@ public class Services {
         if (retrofit == null) {
             retrofit = new Retrofit.Builder()
                     .addConverterFactory(GsonConverterFactory.create())
-                    .baseUrl(String.format(
-                            "%s://%s:%s/",
-                            Constants.BE_PROTO,
-                            Constants.BE_IP,
-                            Constants.BE_PORT
-                    ))
+                    .baseUrl(Constants.BE_IP)
                     .build();
 
             transitService = retrofit.create(TransitService.class);
