@@ -77,36 +77,35 @@ fun <T> ChipsList(
                 )
             }
 
-            data.forEach {
-                item {
-                    Chip(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = { onClick(it) },
-                        colors = ChipDefaults.secondaryChipColors(),
-                        label = {
-                            Text(
-                                text = when (it) {
-                                    is Stop -> it.stopName
-                                    is Departure -> "${it.routeShortName} - ${it.directionHeadsign}"
-                                    else -> ""
-                                },
-                                overflow = TextOverflow.Ellipsis,
-                                maxLines = 1
-                            )
-                        },
-                        secondaryLabel = {
-                            Text(
-                                text = when (it) {
-                                    is Stop -> "${it.distance}m"
-                                    is Departure -> "${it.departureInterval}min"
-                                    else -> ""
-                                },
-                                overflow = TextOverflow.Ellipsis,
-                                maxLines = 1
-                            )
-                        }
-                    )
-                }
+            items(data.size) {
+                val it = data[it]
+                Chip(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { onClick(it) },
+                    colors = ChipDefaults.secondaryChipColors(),
+                    label = {
+                        Text(
+                            text = when (it) {
+                                is Stop -> it.stopName
+                                is Departure -> "${it.routeShortName} - ${it.directionHeadsign}"
+                                else -> ""
+                            },
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+                        )
+                    },
+                    secondaryLabel = {
+                        Text(
+                            text = when (it) {
+                                is Stop -> "${it.distance}m"
+                                is Departure -> "${it.departureInterval}min"
+                                else -> ""
+                            },
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+                        )
+                    }
+                )
             }
         }
     }

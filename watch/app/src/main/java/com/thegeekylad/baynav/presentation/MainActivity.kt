@@ -123,7 +123,22 @@ class MainActivity : ComponentActivity() {
                             title = "Nearby Stops",
                             data = stopsList.value,
                             onClick = {
-                                navController.navigate("${DeparturesDestination().path}?global_stop_id=${it.globalStopId}&stop_name=${it.stopName}")
+                                coroutineScope.launch(Dispatchers.IO) {
+                                    isApiCall.value = true
+                                    val res = Services.Helper.getStopDepartures(it.globalStopId, null)
+                                    if (res == null) {
+                                        withContext(Dispatchers.Main) {
+                                            toastThrottledStatus()
+                                            navController.popBackStack()
+                                        }
+                                    } else {
+                                        departuresList.value = res
+                                        withContext(Dispatchers.Main) {
+                                            navController.navigate("${DeparturesDestination().path}?global_stop_id=${it.globalStopId}&stop_name=${it.stopName}")
+                                        }
+                                    }
+                                    isApiCall.value = false
+                                }
                             }
                         )
                     }
@@ -137,28 +152,11 @@ class MainActivity : ComponentActivity() {
                     ) {
                         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-                        val globalStopId = it.arguments?.getString("global_stop_id")
-                        LaunchedEffect(key1 = globalStopId) {
-                            coroutineScope.launch(Dispatchers.IO) {
-                                isApiCall.value = true
-                                val res = Services.Helper.getStopDepartures(globalStopId, null)
-                                if (res == null) {
-                                    withContext(Dispatchers.Main) {
-                                        toastThrottledStatus()
-                                        navController.popBackStack()
-                                    }
-                                } else {
-                                    departuresList.value = res
-                                }
-                                isApiCall.value = false
-                            }
-                        }
-
                         ChipsList(
                             title = it.arguments?.getString("stop_name") ?: "Departures",
                             data = departuresList.value,
                             onClick = { departure ->
-                                navController.navigate("${TrackerDestination().path}?countdown=${departure.departureInterval}&global_stop_id=$globalStopId&global_route_id=${departure.globalRouteId}")
+                                navController.navigate("${TrackerDestination().path}?countdown=${departure.departureInterval}&global_stop_id=${it.arguments!!.getString("global_stop_id")}&global_route_id=${departure.globalRouteId}")
                             }
                         )
                     }
