@@ -26,6 +26,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -78,4 +79,6 @@ dependencies {
     // horologist-compose-layout
     implementation("com.google.android.horologist:horologist-compose-layout:0.6.3")
 
+    // fused location provider
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 }
