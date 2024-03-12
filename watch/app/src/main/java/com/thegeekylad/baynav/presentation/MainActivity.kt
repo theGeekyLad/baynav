@@ -9,6 +9,8 @@ package com.thegeekylad.baynav.presentation
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -84,29 +86,39 @@ class MainActivity : ComponentActivity() {
                 val keyOnce = 0
 
                 // sync stops / location
-//                LaunchedEffect(key1 = keyOnce) {
-////                    val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(applicationContext)
-////                    fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
-//                    coroutineScope.launch(Dispatchers.IO) {
-////                            stopsList.value = Services.Helper.getNearbyStops(
-////                                location.latitude.toString(),
-////                                location.longitude.toString(),
-////                            )
-//                        isApiCall.value = true
-//                        stopsList.value = Services.Helper.getNearbyStops(
-//                            "37.330640868974236",
-//                            "-121.90519826561415"
-//                        )
-//                        isApiCall.value = false
+                LaunchedEffect(key1 = keyOnce) {
+//                    val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(applicationContext)
+//                    fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
+                    coroutineScope.launch(Dispatchers.IO) {
+//                            stopsList.value = Services.Helper.getNearbyStops(
+//                                location.latitude.toString(),
+//                                location.longitude.toString(),
+//                            )
+                        isApiCall.value = true
+                        val res = Services.Helper.getNearbyStops(
+                            "37.330640868974236",
+                            "-121.90519826561415"
+                        )
+                        if (res == null) {
+                            withContext(Dispatchers.Main) {
+                                toastThrottledStatus()
+                                navController.popBackStack()
+                            }
+                        } else {
+                            stopsList.value = res
+                        }
+                        isApiCall.value = false
+                    }
 //                    }
-////                    }
-//                }
+                }
 
                 SwipeDismissableNavHost(
                     navController = navController,
-                    startDestination = TrackerDestination().path
+                    startDestination = StopsDestination().path
                 ) {
                     composable(StopsDestination().path) {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
                         ChipsList(
                             title = "Nearby Stops",
                             data = stopsList.value,
@@ -123,12 +135,21 @@ class MainActivity : ComponentActivity() {
                             navArgument("stop_name") { }
                         )
                     ) {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
                         val globalStopId = it.arguments?.getString("global_stop_id")
                         LaunchedEffect(key1 = globalStopId) {
                             coroutineScope.launch(Dispatchers.IO) {
                                 isApiCall.value = true
-                                departuresList.value =
-                                    Services.Helper.getStopDepartures(globalStopId)
+                                val res = Services.Helper.getStopDepartures(globalStopId, null)
+                                if (res == null) {
+                                    withContext(Dispatchers.Main) {
+                                        toastThrottledStatus()
+                                        navController.popBackStack()
+                                    }
+                                } else {
+                                    departuresList.value = res
+                                }
                                 isApiCall.value = false
                             }
                         }
@@ -136,14 +157,27 @@ class MainActivity : ComponentActivity() {
                         ChipsList(
                             title = it.arguments?.getString("stop_name") ?: "Departures",
                             data = departuresList.value,
-                            onClick = {
-                                // TODO implement
+                            onClick = { departure ->
+                                navController.navigate("${TrackerDestination().path}?countdown=${departure.departureInterval}&global_stop_id=$globalStopId&global_route_id=${departure.globalRouteId}")
                             }
                         )
                     }
 
-                    composable(TrackerDestination().path) {
-                        DepartureTracker()
+                    composable(
+                        "${TrackerDestination().path}?countdown={countdown}&global_stop_id={global_stop_id}&global_route_id={global_route_id}",
+                        arguments = listOf(
+                            navArgument("countdown") { },
+                            navArgument("global_stop_id") { },
+                            navArgument("global_route_id") { }
+                        )
+                    ) {
+                        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+                        DepartureTracker(
+                            countdown = it.arguments!!.getString("countdown")!!.toInt() * 60,
+                            globalStopId = it.arguments!!.getString("global_stop_id")!!,
+                            globalRouteId = it.arguments!!.getString("global_route_id")!!,
+                        )
                     }
                 }
 
@@ -171,4 +205,9 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun toastThrottledStatus() {
+        Toast.makeText(applicationContext, "You've been throttled!", Toast.LENGTH_SHORT).show()
+    }
+
 }

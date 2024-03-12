@@ -50,9 +50,9 @@ public class Services {
             }
         }
 
-        public static List<Departure> getStopDepartures(String globalStopId) {
+        public static List<Departure> getStopDepartures(String globalStopId, String globalRouteId) {
             try {
-                return getTransitService().stopDepartures(globalStopId).execute().body();
+                return getTransitService().stopDepartures(globalStopId, globalRouteId).execute().body();
             } catch (IOException e) {
                 logger.printHeader(String.format("Error: \"%s\"", e.getMessage()), 0);
                 e.printStackTrace();

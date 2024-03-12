@@ -22,6 +22,7 @@ public interface TransitService {
 
     @GET("stop_departures")
     Call<List<Departure>> stopDepartures(
-            @Query("global_stop_id") String global_stop_id
+            @Query("global_stop_id") String global_stop_id,
+            @Query("global_route_id") String global_route_id
     );
 }
