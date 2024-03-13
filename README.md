@@ -1,62 +1,29 @@
-# Baynav
+# BayNav :bus:
 
-## Todo
+This project attempts to bring the VTA's Transit app experience on Wear OS smartwatches. The goal is to bridge the gap between the Bay Area's public transport frequenters and Android smartwatch enthusiasts.
 
-- Don't return all stops
-  - List is huge
-    - Also involves sorting by distance = heavy
-  - Only return a few
-  - Let the user "load more"
+## Ain't on Play Store? :no_mouth:
 
-## APIs
+That's 'cuz we're FOSS! :shield:
 
-### `GET` /nearby_stops
+For sure, but there's more to it. Outright, the app is pretty straightforward but here's why it isn't on Play Store yet:
 
-- Track number of Transit API calls made
-  - If under 5,
-    - Cache `(req, res)` in a map
-    - Return response
-  - If 5, return cached response
+1. You need an API key to poll Transit, which comes with rate limits -- one key can't rule it all
+2. Imagine typing out a 64-character API key on an ant-sized watch screen
+3. A phone app pair sounds good but out of scope at the moment
+4. Other access code flows can be ingenious but then again #3
 
-#### Request
+## Gimme the app :money_with_wings:
 
-- lat
-- long
+The only way to get an installable APK is by cloning and building this project on Android Studio, locally.
 
-#### Response
+### Most important steps! :point_up:
 
-Sorted in ascending order of distance.
+1. Email the Transit team for an API key
+2. Edit `baynav/util/Constants.java` to include the API key in the `TRANSIT_API_KEY` variable
 
-```JSON
-[
-  {
-    "stop_name": "Santa Clara / 5th",
-    "global_stop_id": "VTA:45880",
-    "distance": "500",
-  }
-]
-```
+_**PS:** I'll try to find some time to set up Gradle on my headless server to automate builds based on your own API key._
 
-### `GET` /stop_departures
+---
 
-#### Request
-
-- global_stop_id
-- global_route_id _(optional)_
-
-#### Response
-
-- If `global_route_id` is present, this endpoint tracks a particular departure
-- Will at least be a single element array
-- Can be repeatedly polled - cache response
-
-```JSON
-[
-  {
-    "global_route_id": "VTA:5837",
-    "route_short_name": "22",
-    "direction_headsign": "Palo Alto",
-    "departure_interval": 145, // secs
-  }
-]
-```
+Hopefully the VTA will recognize this tiny project and be generous enough to provide an API key with enough quota. :grin:
