@@ -2,6 +2,8 @@
 
 This project attempts to bring the VTA's Transit app experience on Wear OS smartwatches. The goal is to bridge the gap between the Bay Area's public transport frequenters and Android smartwatch enthusiasts.
 
+https://github.com/theGeekyLad/baynav/assets/15625446/a4bb8b89-9735-48b0-91a7-55845a8427bb
+
 ## Ain't on Play Store? :no_mouth:
 
 That's 'cuz we're FOSS! :shield:
