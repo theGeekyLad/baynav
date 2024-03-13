@@ -100,4 +100,7 @@ dependencies {
 
     // fused location provider
     implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // viewmodelscope
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0")
 }

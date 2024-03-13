@@ -13,6 +13,7 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,6 +65,7 @@ import com.thegeekylad.baynav.presentation.theme.BaynavTheme
 import com.thegeekylad.baynav.presentation.ui.widget.ChipsList
 import com.thegeekylad.baynav.presentation.ui.widget.DepartureTracker
 import com.thegeekylad.baynav.presentation.util.Services
+import com.thegeekylad.baynav.presentation.viewmodel.MainViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -75,42 +77,19 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             BaynavTheme {
                 val navController = rememberSwipeDismissableNavController()
                 val coroutineScope = rememberCoroutineScope()
-                val stopsList: MutableState<List<Stop>> = remember { mutableStateOf(listOf()) }
-                val departuresList: MutableState<List<Departure>> =
-                    remember { mutableStateOf(listOf()) }
-                val isApiCall = remember { mutableStateOf(false) }
-                val keyOnce = 0
+                val mainViewModel: MainViewModel by viewModels()
 
                 // sync stops / location
-                LaunchedEffect(key1 = keyOnce) {
-                    isApiCall.value = true
-                    val fusedLocationProviderClient =
-                        LocationServices.getFusedLocationProviderClient(applicationContext)
-                    fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
-                        coroutineScope.launch(Dispatchers.IO) {
-//                        val res = Services.Helper.getNearbyStops(
-//                            "37.330640868974236",
-//                            "-121.90519826561415"
-//                        )
-                            val res = Services.Helper.getNearbyStops(
-                                location.latitude.toString(),
-                                location.longitude.toString(),
-                            )
-                            if (res == null) {
-                                withContext(Dispatchers.Main) {
-                                    toastThrottledStatus()
-                                    finish()
-                                }
-                            } else {
-                                stopsList.value = res
-                            }
-                            isApiCall.value = false
-                        }
-                    }
+                LaunchedEffect(key1 = 0) {
+                    mainViewModel.syncNearbyStops(
+                        { Toast.makeText(applicationContext, it, Toast.LENGTH_SHORT).show() },
+                        { finish() }
+                    )
                 }
 
                 SwipeDismissableNavHost(
@@ -122,23 +101,17 @@ class MainActivity : ComponentActivity() {
 
                         ChipsList(
                             title = "Nearby Stops",
-                            data = stopsList.value,
-                            onClick = {
+                            data = mainViewModel.stopsList.value,
+                            onClick = { stop ->
+                                // sync departures from this stop
                                 coroutineScope.launch(Dispatchers.IO) {
-                                    isApiCall.value = true
-                                    val res = Services.Helper.getStopDepartures(it.globalStopId, null)
-                                    if (res == null) {
-                                        withContext(Dispatchers.Main) {
-                                            toastThrottledStatus()
-//                                            navController.popBackStack()
-                                        }
-                                    } else {
-                                        departuresList.value = res
-                                        withContext(Dispatchers.Main) {
-                                            navController.navigate("${DeparturesDestination().path}?global_stop_id=${it.globalStopId}&stop_name=${it.stopName}")
-                                        }
-                                    }
-                                    isApiCall.value = false
+                                    mainViewModel.syncDepartures(
+                                        globalStopId = stop.globalStopId,
+                                        stopName = stop.stopName,
+                                        navController = navController,
+                                        onToast = { Toast.makeText(applicationContext, it, Toast.LENGTH_SHORT).show() },
+                                        onFinish = { finish() }
+                                    )
                                 }
                             }
                         )
@@ -155,7 +128,7 @@ class MainActivity : ComponentActivity() {
 
                         ChipsList(
                             title = it.arguments?.getString("stop_name") ?: "Departures",
-                            data = departuresList.value,
+                            data = mainViewModel.departuresList.value,
                             onClick = { departure ->
                                 navController.navigate("${TrackerDestination().path}?" +
                                         "countdown=${departure.departureInterval}&" +
@@ -190,7 +163,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 // spin on api calls
-                if (isApiCall.value) {
+                if (mainViewModel.isApiCall.value) {
                     Box(
                         modifier = Modifier
                             .background(MaterialTheme.colors.background)
@@ -214,9 +187,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    private fun toastThrottledStatus() {
-        Toast.makeText(applicationContext, "You've been throttled!", Toast.LENGTH_SHORT).show()
     }
 }
